@@ -1,92 +1,87 @@
 <?php
-include 'config.php';
+    include("connect.php");
 
-if(isset($_POST['btn-save'])){
-    $taskTitle = $_POST['task_title'];
-    $toDo->setTitle($taskTitle);
-
-    if($toDo->add())
+    if (isset($_POST['btn']))
     {
-        header("Location: index.php?inserted");
+      $date=$_POST['idate'];
+      $q="select * from grocerytb where Date='$date'";
+      $query=mysqli_query($con,$q);
+    } 
+	else 
+	{
+      $q= "select * from grocerytb";
+      $query=mysqli_query($con,$q);
     }
-    else
-    {
-        header("Location: index.php?failure");
-    }
-}
-if(isset($_POST['btn-complete'])){
-    $taskId = $_POST['btn-complete'];
-    $toDo->setId($taskId);
-    if($toDo->complete())
-    {
-        header("Location: index.php?completed");
-    }
-    else
-    {
-        header("Location: index.php?notcompleted");
-    }
-}
-if(isset($_POST['btn-delete'])){
-    $taskId = $_POST['btn-delete'];
-    $toDo->setId($taskId);
-    if($toDo->remove())
-    {
-        header("Location: index.php?completed");
-    }
-    else
-    {
-        header("Location: index.php?notcompleted");
-    }
-}
-if(isset($_POST['btn-edit']))
-{
-    $taskId = $_POST['btn-edit'];
-
-    header("Location: edit.php?edit_id=$taskId");
-}
-
 ?>
 
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>View List</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <div class="container mt-5">
+            <!-- top -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1>View Grocery List</h1>
+                    <a href="add.php">Add Item</a>
+                </div>
+                <div class="col-lg-4">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Date Filtering-->
+                            <form method="post" action="">
+                              <input type="date" class="form-control" name="idate">
+                        </div>
+                          <div class="col-lg-4" method="post">
+                            <input type="submit" class="btn btn-danger float-right" name="btn" value="filter">
+                        </div>
+                            </form>
+                    </div>
+                </div>
+            </div>
+           
+            <!-- Grocery Cards -->
+            <div class="row mt-4">
+                
+             <?php
+                  while ($qq=mysqli_fetch_array($query)) 
+                  {
+                  
+             ?>
 
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                          <h5 class="card-title"><?php echo $qq['Item_name']; ?></h5>
+                          <h6 class="card-subtitle mb-2 text-muted"><?php echo $qq['Item_Quantity']; ?></h6>
+                          <?php
+                          if($qq['Item_status'] == 0) {
+                          ?>
+                            <p class="text-info">PENDING</p>
+                          <?php
+                          } else if($qq['Item_status'] == 1) {
+                          ?>
+                            <p class="text-success">BOUGHT</p>
+                          <?php } else { ?> 
+                            <p class="text-danger">NOT AVAILABLE</p>
+                          <?php } ?>
+                          <a href="delete.php?id=<?php echo $qq['Id']; ?>" class="card-link">Delete</a>
+    					            <a href="update.php?id=<?php echo $qq['Id']; ?>" class="card-link">Update</a>
+                        </div>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title></title>
-    <link href="main.css" rel="stylesheet" media="screen">
+                      </div><br>
+                </div>
+                <?php
+                  
 
-</head>
-
-<body>
-
-<div class="navbar navbar-default navbar-static-top" role="navigation">
-    <div class="container">
-
-        <div class="">
-            <a class="" href="#">Home</a>
+                  }
+                ?>
+                
+            </div>
         </div>
-
-    </div>
-</div>
-<div id="content">
-    <form method="post">
-        <h3>Add New Task</h3>
-        <input type='text' name='task_title' class='form-control' required>
-        <button type="submit" class="btn12" name="btn-save">
-            Add New Task
-        </button>
-    </form>
-</div>
-<ul>
-    <?php
-    $toDo->all();
-    ?>
-</ul>
-
-
-
-
-
-
-
+    </body>
+</html>
